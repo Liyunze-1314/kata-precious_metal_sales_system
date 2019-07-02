@@ -2,11 +2,20 @@ package com.coding.sales;
 
 import com.coding.sales.Entity.Commons;
 import com.coding.sales.Entity.Member;
+import com.coding.sales.Entity.Product;
 import com.coding.sales.input.OrderCommand;
 import com.coding.sales.input.OrderItemCommand;
 import com.coding.sales.output.OrderRepresentation;
+import com.coding.sales.strategy.CashContext;
+import com.coding.sales.strategy.DiscountCash;
+import com.coding.sales.strategy.FullReduceCash;
+import com.sun.org.apache.regexp.internal.REUtil;
+import com.sun.org.apache.xpath.internal.functions.FuncUnparsedEntityURI;
+import jdk.nashorn.internal.objects.PrototypeObject;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -39,7 +48,8 @@ public class OrderApp {
     OrderRepresentation checkout(OrderCommand command) {
         OrderRepresentation result = null;
 
-      //TODO: 请完成需求指定的功能
+
+        //TODO: 请完成需求指定的功能
 
         //会员id
         String memberId = command.getMemberId();
@@ -52,6 +62,30 @@ public class OrderApp {
         List<OrderItemCommand> items = command.getItems();
 
         for (OrderItemCommand item : items) {
+            //获取商品信息
+            Product product = Commons.getProduct(item.getProduct());
+            // 计算满减金额
+            int amount = item.getAmount().intValue();
+            double subTotal = product.getPrice() * amount;
+
+            String fullReduction = product.getFullReduction();
+            if(!"".equals(fullReduction)){
+                //判断是否可以参加满3
+                String[] split = fullReduction.split(",");
+
+            }
+
+
+
+
+            //判断商品是否有活动信息 如果有活动的信息，计算每种活动个折扣金额，取折扣最大的
+            // 计算折扣金额
+            double discountCash = getDiscountCash(product, subTotal);
+
+            //计算满减金额
+
+            getFullReduceCash(product,subTotal);
+
 
         }
 
@@ -60,7 +94,20 @@ public class OrderApp {
         return result;
     }
 
+    private void getFullReduceCash(Product product, double subTotal) {
+        String[] split = product.getFullReduction().split(",");
 
+
+    }
+
+    private double getDiscountCash(Product product, double subTotal) {
+
+        String discountCard = product.getDiscountCard();
+        CashContext cashContext = new CashContext(discountCard);
+        double discountCash = cashContext.getResult(subTotal);
+        return discountCash ;
+
+    }
 
 
 }
